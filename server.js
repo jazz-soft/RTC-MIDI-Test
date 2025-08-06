@@ -5,6 +5,8 @@ const createError = require('http-errors');
 const express = require('express');
 const path = require('path');
 const logger = require('morgan');
+const ws = require('ws');
+const wss = new ws.WebSocketServer({ noServer: true });
 
 const app = express();
 app.set('view engine', 'ejs');
@@ -35,6 +37,7 @@ server.on('listening', function() {
   openurl.open(`http://localhost:${port}`);
 });
 
+server.on('upgrade', upgrade);
 server.listen(port);
 
 function myIP() {
@@ -47,4 +50,8 @@ function myIP() {
     }
   }
   return 'localhost';
+}
+
+function upgrade(req, socket, head) {
+  wss.handleUpgrade(req, socket, head, function(ws) { wss.emit('connection', ws, req); });
 }
