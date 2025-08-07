@@ -37,7 +37,9 @@ server.on('listening', function() {
   openurl.open(`http://localhost:${port}`);
 });
 
-server.on('upgrade', upgrade);
+server.on('upgrade', function(req, socket, head) {
+  wss.handleUpgrade(req, socket, head, function(ws) { wss.emit('connection', ws, req); });
+});
 server.listen(port);
 
 function myIP() {
@@ -52,6 +54,13 @@ function myIP() {
   return 'localhost';
 }
 
-function upgrade(req, socket, head) {
-  wss.handleUpgrade(req, socket, head, function(ws) { wss.emit('connection', ws, req); });
-}
+wss.on('connection', function(ws) {
+  console.log('WS opened!');
+  ws.on('error', console.error);
+  ws.on('close', function message() {
+    console.log('WS closed!');
+  });
+  ws.on('message', function message(data) {
+    console.log('WS data:', data);
+  });
+});
