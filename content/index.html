@@ -1,18 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+<script src="signaling.js"></script>
 </head>
 <body>
 <h1>test</h1>
 <script>
-var ws = new WebSocket((window.location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host);
-ws.onopen = (event) => {
-  console.log('WS opened!');
-  ws.send('hello from the client!');
-};
-ws.onmessage = (event) => {
-  console.log(event.data);
-};
+var Sig = new Signaling();
 </script>
 </body>
 </html>
