@@ -61,24 +61,30 @@ wss.on('connection', function(ws) {
   if (!wsA) {
     wsA = ws;
     ws.on('message', function message(data) {
-      console.log('wsA data:', data);
-      if (wsB) wsB.send(data);
+      if (wsB) wsB.send(data.toString());
     });
     ws.on('close', function message() {
-      console.log('wsA closed!');
       wsA = undefined;
+      if (wsB) wsB.send(JSON.stringify({ peer: 'closed'}));
     });
+    if (wsB) {
+      wsA.send(JSON.stringify({ peer: 'polite'}));
+      wsB.send(JSON.stringify({ peer: 'impolite'}));
+    }
   }
   else if (!wsB) {
     wsB = ws;
     ws.on('message', function message(data) {
-      console.log('wsB data:', data);
-      if (wsA) wsA.send(data);
+      if (wsA) wsA.send(data.toString());
     });
     ws.on('close', function message() {
-      console.log('wsB closed!');
       wsB = undefined;
+      if (wsA) wsA.send(JSON.stringify({ peer: 'closed'}));
     });
+    if (wsA) {
+      wsA.send(JSON.stringify({ peer: 'polite'}));
+      wsB.send(JSON.stringify({ peer: 'impolite'}));
+    }
   }
   else ws.close();
 });
