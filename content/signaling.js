@@ -7,4 +7,10 @@ function Signaling() {
   ws.onmessage = function(evt) {
     console.log(evt.data);
   };
+  ws.onclose = function(evt) {
+    console.log('WS closed!');
+  };
+  ws.onerror = function(evt) {
+    console.log('WS error!');
+  };
 }

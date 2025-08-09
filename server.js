@@ -54,13 +54,31 @@ function myIP() {
   return 'localhost';
 }
 
+var wsA, wsB;
+
 wss.on('connection', function(ws) {
-  console.log('WS opened!');
   ws.on('error', console.error);
-  ws.on('close', function message() {
-    console.log('WS closed!');
-  });
-  ws.on('message', function message(data) {
-    console.log('WS data:', data);
-  });
+  if (!wsA) {
+    wsA = ws;
+    ws.on('message', function message(data) {
+      console.log('wsA data:', data);
+      if (wsB) wsB.send(data);
+    });
+    ws.on('close', function message() {
+      console.log('wsA closed!');
+      wsA = undefined;
+    });
+  }
+  else if (!wsB) {
+    wsB = ws;
+    ws.on('message', function message(data) {
+      console.log('wsB data:', data);
+      if (wsA) wsA.send(data);
+    });
+    ws.on('close', function message() {
+      console.log('wsB closed!');
+      wsB = undefined;
+    });
+  }
+  else ws.close();
 });
