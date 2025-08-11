@@ -2,11 +2,22 @@
 <html>
 <head>
 <script src="signaling.js"></script>
+<script src="webrtc.js"></script>
+<style>
+video { background-color: #ccc; width: 360px; }
+</style>
 </head>
 <body>
 <h1>test</h1>
+<video id="local_video" autoplay muted></video>
+<video id="received_video" autoplay></video>
+
 <script>
 var Sig = new Signaling();
+var Rtc = new WebRtc();
+navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
+  document.getElementById("local_video").srcObject = stream;
+});
 </script>
 </body>
 </html>
