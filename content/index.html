@@ -14,7 +14,7 @@ video { background-color: #ccc; width: 360px; }
 
 <script>
 var Sig = new Signaling();
-var Rtc = new WebRtc();
+var Rtc = new WebRtc(Sig);
 navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
   document.getElementById("local_video").srcObject = stream;
   for (var track of stream.getTracks()) Rtc.addTrack(track);

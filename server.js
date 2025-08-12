@@ -65,11 +65,11 @@ wss.on('connection', function(ws) {
     });
     ws.on('close', function message() {
       wsA = undefined;
-      if (wsB) wsB.send(JSON.stringify({ peer: 'closed'}));
+      if (wsB) wsB.send(JSON.stringify({ peer: 'closed' }));
     });
     if (wsB) {
-      wsA.send(JSON.stringify({ peer: 'polite'}));
-      wsB.send(JSON.stringify({ peer: 'impolite'}));
+      wsA.send(JSON.stringify({ peer: 'polite' }));
+      wsB.send(JSON.stringify({ peer: 'impolite' }));
     }
   }
   else if (!wsB) {
@@ -79,11 +79,11 @@ wss.on('connection', function(ws) {
     });
     ws.on('close', function message() {
       wsB = undefined;
-      if (wsA) wsA.send(JSON.stringify({ peer: 'closed'}));
+      if (wsA) wsA.send(JSON.stringify({ peer: 'closed' }));
     });
     if (wsA) {
-      wsA.send(JSON.stringify({ peer: 'polite'}));
-      wsB.send(JSON.stringify({ peer: 'impolite'}));
+      wsA.send(JSON.stringify({ peer: 'polite' }));
+      wsB.send(JSON.stringify({ peer: 'impolite' }));
     }
   }
   else ws.close();

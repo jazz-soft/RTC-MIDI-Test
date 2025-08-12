@@ -1,4 +1,5 @@
-function WebRtc() {
+function WebRtc(sig) {
+  this.sig = sig;
   this.rtc = new RTCPeerConnection();
 }
 
