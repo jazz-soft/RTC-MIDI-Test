@@ -17,7 +17,7 @@ var Sig = new Signaling();
 var Rtc = new WebRtc(Sig);
 navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
   document.getElementById("local_video").srcObject = stream;
-  for (var track of stream.getTracks()) Rtc.addTrack(track);
+  for (var track of stream.getTracks()) Rtc.rtc.addTrack(track, stream);
 });
 </script>
 </body>
