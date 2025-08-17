@@ -32,7 +32,7 @@ Signaling.prototype.connect = function() {
         }
       }
       catch (e) {
-        console.log(e, data.text());
+        console.log(e, data);
       }
     };
     this.ws.onclose = function(evt) {
