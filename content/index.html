@@ -19,7 +19,6 @@ navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(
   for (var track of stream.getTracks()) RTC.addTrack(track, stream);
 }).catch(function(e) { console.log('Error:', e.message); });
 RTC.ontrack = function(x) {
-  console.log('ON TRACK', x);
   document.getElementById('received_video').srcObject = x.streams[0];
 };
 </script>
