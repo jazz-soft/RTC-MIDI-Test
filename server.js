@@ -1,5 +1,7 @@
 const os = require('os');
+const fs = require('fs');
 const http = require('http');
+const https = require('https');
 const openurl = require('openurl');
 const createError = require('http-errors');
 const express = require('express');
@@ -31,11 +33,24 @@ app.use(function(err, req, res, next) {
 
 var port = process.argv[2] || 8888;
 app.set('port', port);
-const server = http.createServer(app);
-server.on('listening', function() {
-  console.log(`http://${myIP()}:${port}`);
-  openurl.open(`http://localhost:${port}`);
-});
+
+var server;
+try {
+  const key = fs.readFileSync(path.join(__dirname, '/server.key'), 'utf8');
+  const cert = fs.readFileSync(path.join(__dirname, '/server.crt'), 'utf8');
+  server = https.createServer({ key: key, cert: cert }, app);
+  server.on('listening', function() {
+    console.log(`https://${myIP()}:${port}`);
+    openurl.open(`https://localhost:${port}`);
+  });
+}
+catch (e) {
+  server = http.createServer(app);
+  server.on('listening', function() {
+    console.log(`http://${myIP()}:${port}`);
+    openurl.open(`http://localhost:${port}`);
+  });
+}
 
 server.on('upgrade', function(req, socket, head) {
   wss.handleUpgrade(req, socket, head, function(ws) { wss.emit('connection', ws, req); });
