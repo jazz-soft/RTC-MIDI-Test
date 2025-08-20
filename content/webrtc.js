@@ -9,7 +9,7 @@ function WebRtc() {
 }
 
 WebRtc.prototype.start = function(x) {
-  if (x != 'polite') return;
+  if (x != 'A') return;
   var self = this;
   self.rtc.createOffer().then(function(offer) {
     return self.rtc.setLocalDescription(offer);
