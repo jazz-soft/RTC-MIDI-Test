@@ -15,15 +15,17 @@ video { background-color: #ccc; width: 360px; }
 <video id="received_video" autoplay></video>
 
 <script>
-var RTC = new WebRtc().rtc; // RTCPeerConnection
-navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
-  document.getElementById('local_video').srcObject = stream;
-  for (var track of stream.getTracks()) RTC.addTrack(track, stream);
-}).catch(function(e) { console.log('Error:', e.message); });
-RTC.ontrack = function(x) {
-  document.getElementById('received_video').srcObject = x.streams[0];
-};
-var connection = JZZ.RTC.connect(RTC);
+var RTC = new WebRtc();
+RTC.start = function(rtc) {
+  navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
+    document.getElementById('local_video').srcObject = stream;
+    for (var track of stream.getTracks()) rtc.addTrack(track, stream);
+  }).catch(function(e) { console.log('Error:', e.message); });
+  rtc.ontrack = function(x) {
+    document.getElementById('received_video').srcObject = x.streams[0];
+  };
+}
+//var connection = JZZ.RTC.connect(RTC);
 </script>
 </body>
 </html>
