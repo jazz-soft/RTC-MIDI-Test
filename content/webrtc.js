@@ -2,57 +2,44 @@ function WebRtc() {
   var self = this;
   this.sig = new Signaling();
   this.rtc = new RTCPeerConnection();
-  this.sig.onfound = function(x) { self.start(x); };
+  this.sig.onfound = function(x) { self.imp = (x == 'A'); self.offer(); };
   this.sig.onrtc = function(x) { self.onrtc(x); };
   this.rtc.onicecandidate = function(x) { self.onicecandidate(x); };
-  this.rtc.onnegotiationneeded = function() { self.onnegotiationneeded(); };
+  this.rtc.onnegotiationneeded = function() { self.offer(); };
 }
 
-WebRtc.prototype.start = function(x) {
-  if (x != 'A') return;
-  var self = this;
-  self.rtc.createOffer().then(function(offer) {
-    return self.rtc.setLocalDescription(offer);
-  }).then(function() {
-    self.sig.rtc({ offer: self.rtc.localDescription });
-  });
-}
-
-WebRtc.prototype.onrtc = function(x) {
-  //console.log('RTC:', x);
-  var self = this;
-  if (x.offer) {
-    const desc = new RTCSessionDescription(x.offer);
-    self.rtc.setRemoteDescription(desc).then(function() {
-      return self.rtc.createAnswer();
-    }).then(function(answer) {
-      return self.rtc.setLocalDescription(answer);
-    }).then(function() {
-      self.sig.rtc({ answer: self.rtc.localDescription });
-    });
+WebRtc.prototype.onrtc = async function(x) {
+  try {
+    if (x.offer) {
+      if (this.imp && (this.inprogress || this.rtc.signalingState != 'stable' && !this.pending)) return;
+      await this.rtc.setRemoteDescription(await new RTCSessionDescription(x.offer));
+      await this.rtc.setLocalDescription();
+      this.sig.rtc({ answer: this.rtc.localDescription });
+    }
+    else if (x.answer) {
+      this.pending = true;
+      await this.rtc.setRemoteDescription(await new RTCSessionDescription(x.answer));
+      this.pending = undefined;
+    }
+    else if (x.candidate) {
+      await this.rtc.addIceCandidate(await new RTCIceCandidate(x.candidate));
+    }
   }
-  else if (x.answer) {
-    const desc = new RTCSessionDescription(x.answer);
-    self.rtc.setRemoteDescription(desc);
-  }
-  else if (x.candidate) {
-    const candidate = new RTCIceCandidate(x.candidate);
-    self.rtc.addIceCandidate(candidate).catch(error);
-  }
+  catch (e) { error(e); }
 }
 
 WebRtc.prototype.onicecandidate = function(x) {
   if (x.candidate !== null) this.sig.rtc({ candidate: x.candidate });
 }
 
-WebRtc.prototype.onnegotiationneeded = function() {
-  console.log('negotiationneeded');
-  var self = this;
-  self.rtc.createOffer().then(function(offer) {
-    return self.rtc.setLocalDescription(offer);
-  }).then(function() {
-    self.sig.rtc({ offer: self.rtc.localDescription });
-  });
+WebRtc.prototype.offer = async function() {
+  this.inprogress = true;
+  try {
+    await this.rtc.setLocalDescription();
+    this.sig.rtc({ offer: this.rtc.localDescription });
+  }
+  catch (e) { error(e); }
+  this.inprogress = undefined;
 }
 
 function error(e) { console.log('Error:', e.message); }

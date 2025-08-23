@@ -7,6 +7,7 @@ Signaling.prototype.connect = function() {
   try {
     this.ws = new WebSocket((window.location.protocol == 'https:' ? 'wss://' : 'ws://') + window.location.host);
     this.ws.onopen = function(evt) {
+      self.open = true;
       if (self.timeout) {
         clearInterval(self.timeout);
         self.timeout = undefined;
@@ -37,6 +38,7 @@ Signaling.prototype.connect = function() {
     };
     this.ws.onclose = function(evt) {
       console.log('WS closed!');
+      self.open = undefined;
       self.timeout = setTimeout(function() { self.connect(); }, 2000);
       if (self.peer) {
         self.peer = undefined;
@@ -53,7 +55,7 @@ Signaling.prototype.connect = function() {
 }
 
 Signaling.prototype.rtc = function(x) {
-  if (this.ws) this.ws.send(JSON.stringify({ rtc: x }));
+  if (this.open) this.ws.send(JSON.stringify({ rtc: x }));
 }
 
 Signaling.prototype.onfound = function(x) {

@@ -23,6 +23,7 @@ navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(
 RTC.ontrack = function(x) {
   document.getElementById('received_video').srcObject = x.streams[0];
 };
+var connection = JZZ.RTC.connect(RTC);
 </script>
 </body>
 </html>
