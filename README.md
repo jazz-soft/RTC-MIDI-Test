@@ -1,4 +1,11 @@
-coming soon...
+# RTC-MIDI-Test
+This is a test/demo for the [JZZ-midi-RTC](https://github.com/jazz-soft/JZZ-midi-RTC) package.
+
+You can use it as a starting point for your own applications.
+
+This server establishes a WebRTC session between two clients on a local network.
+
+For simplicity, only two clients are supported simultaneously, and no STUN/TURN servers are involved.
 
 ## Usage
 `npm install`  

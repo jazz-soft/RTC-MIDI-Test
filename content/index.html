@@ -1,8 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
+<title>WebRTC MIDI</title>
 <script src="JZZ.js"></script>
 <script src="JZZ.midi.RTC.js"></script>
+<script src="JZZ.gui.Select.js"></script>
+<script src="JZZ.input.Kbd.js"></script>
+<script src="JZZ.synth.Tiny.js"></script>
 <script src="signaling.js"></script>
 <script src="webrtc.js"></script>
 <style>
@@ -10,11 +14,25 @@ video { background-color: #ccc; width: 360px; }
 </style>
 </head>
 <body>
-<h1>test</h1>
+<h1>WebRTC MIDI Test</h1>
+<p>
 <video id="local_video" autoplay muted></video>
 <video id="received_video" autoplay></video>
+</p><p>
+<select id=select_midi_in></select>
+<select id=select_midi_out></select>
+</p>
 
 <script>
+var widget = JZZ.Widget({ _receive: function(msg) {
+  console.log(msg.toString());
+}});
+var midi_in = JZZ.gui.SelectMidiIn({ at: 'select_midi_in' });
+var midi_out = JZZ.gui.SelectMidiOut({ at: 'select_midi_out' });
+
+var RM = new JZZ.RTC();
+RM.addMidiOut('Test', widget);
+
 var RTC = new WebRtc();
 RTC.start = function(rtc) {
   navigator.mediaDevices.getUserMedia({ audio: true, video: true }).then(function(stream) {
@@ -24,8 +42,8 @@ RTC.start = function(rtc) {
   rtc.ontrack = function(x) {
     document.getElementById('received_video').srcObject = x.streams[0];
   };
+  RM.connect(rtc);
 }
-//var connection = JZZ.RTC.connect(RTC);
 </script>
 </body>
 </html>
