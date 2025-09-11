@@ -10,7 +10,11 @@
 <script src="signaling.js"></script>
 <script src="webrtc.js"></script>
 <style>
-video { background-color: #ccc; width: 360px; }
+#midiin, #midiout, #miditest { border: solid #ccc;}
+.instr { background-color: #eee; margin: .2em; padding: .4em; border: solid #ddd;}
+.off { color: #aaa;}
+video { background-color: #ccc; width: 360px; height: 270px;}
+#local_video { transform: scaleX(-1); }
 </style>
 </head>
 <body>
@@ -18,20 +22,70 @@ video { background-color: #ccc; width: 360px; }
 <p>
 <video id="local_video" autoplay muted></video>
 <video id="received_video" autoplay></video>
-</p><p>
+</p>
+<h2>Share MIDI In:</h2>
+<div id="midiin">
+<div class="instr">
+<div id="piano"></div>
+<input type="checkbox" id="cb1" checked> Virtual Piano
+</div>
+</div>
+<h2>Share MIDI Out:</h2>
+<div id="midiout">
+<div class="instr">
+<input type="checkbox" id="cb2" checked> Web Audio
+</div>
+</div>
+<h2>All ports:</h2>
+<div id="midiin">
+<div class="instr">
+<p>
+<label for=select_midi_in>MIDI In:</label>
 <select id=select_midi_in></select>
+<label for=select_midi_out>MIDI Out:</label>
 <select id=select_midi_out></select>
 </p>
+<div id="kbd"></div>
+</div>
+</div>
 
 <script>
-var widget = JZZ.Widget({ _receive: function(msg) {
-  console.log(msg.toString());
-}});
+var synth = JZZ.synth.Tiny();
+var piano = JZZ.input.Kbd({at: "piano"});
+var kbd = JZZ.input.Kbd({at: "kbd"});
+var inputs = {};
+var outputs = {};
+var cb1 = document.getElementById('cb1');
+var cb2 = document.getElementById('cb2');
+var midiin = document.getElementById('midiin');
+var midiout = document.getElementById('midiout');
+handle(cb1, 'Virtual Piano', false);
+inputs['Virtual Piano'] = { div: midiin, cb: cb1, chk: true, port: piano };
+handle(cb2, 'Web Audio', true);
+outputs['Web Audio'] = { div: midiout, cb: cb2, chk: true, port: synth };
+
+JZZ().and(function() {
+  var p;
+  var info = JZZ().info();
+  for (p of info.inputs) if (p.engine != 'rtc') enable(p.name, false);
+  for (p of info.outputs) if (p.engine != 'rtc') enable(p.name, true);
+});
+JZZ().onChange(function(x) {
+  var p;
+  for (p of x.inputs.added) if (p.engine != 'rtc') enable(p.name, false);
+  for (p of x.outputs.added) if (p.engine != 'rtc') enable(p.name, true);
+  for (p of x.inputs.removed) if (p.engine != 'rtc') disable(p.name, false);
+  for (p of x.outputs.removed) if (p.engine != 'rtc') disable(p.name, true);
+});
+
 var midi_in = JZZ.gui.SelectMidiIn({ at: 'select_midi_in' });
 var midi_out = JZZ.gui.SelectMidiOut({ at: 'select_midi_out' });
+midi_in.connect(kbd);
+kbd.connect(midi_out);
 
 var RM = new JZZ.RTC();
-RM.addMidiOut('Test', widget);
+RM.addMidiIn('Virtual Piano', piano);
+RM.addMidiOut('Web Audio', synth);
 
 var RTC = new WebRtc();
 RTC.start = function(rtc) {
@@ -44,6 +98,72 @@ RTC.start = function(rtc) {
   };
   RM.connect(rtc);
 }
+
+function handle(cb, name, out) {
+  cb.addEventListener('change', function() {
+    if (out) {
+      outputs[name].chk = cb.checked;
+      if (outputs[name].chk) RM.addMidiOut(name, outputs[name].port);
+      else RM.removeMidiOut(name);
+    }
+    else {
+      inputs[name].chk = cb.checked;
+      if (inputs[name].chk) RM.addMidiIn(name, inputs[name].port);
+      else RM.removeMidiIn(name);
+    }
+  });
+}
+function create(name, out) {
+  var div = document.createElement('div');
+  var cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.disabled = true;
+  div.className = 'instr';
+  div.appendChild(cb);
+  div.appendChild(document.createTextNode(' ' + name));
+  (out ? midiout : midiin).appendChild(div);
+  handle(cb, name, out);
+  return { div: div, cb: cb, chk: true };
+}
+function enable(name, out) {
+  if (out) {
+    if (!outputs[name]) outputs[name] = create(name, true);
+    JZZ().openMidiOut(name).and(function(port) {
+      outputs[name].div.classList.remove('off');
+      outputs[name].cb.disabled = false;
+      outputs[name].cb.checked = outputs[name].chk;
+      outputs[name].port = this;
+      if (outputs[name].chk) RM.addMidiOut(name, this);
+    }).or(function() { disable(name, true); });
+  }
+  else {
+    if (!inputs[name]) inputs[name] = create(name, false);
+    JZZ().openMidiIn(name).and(function(port) {
+      inputs[name].div.classList.remove('off');
+      inputs[name].cb.disabled = false;
+      inputs[name].cb.checked = inputs[name].chk;
+      inputs[name].port = this;
+      if (inputs[name].chk) RM.addMidiIn(name, this);
+    }).or(function() { disable(name, false); });
+  }
+}
+function disable(name, out) {
+  if (out) {
+    if (!outputs[name]) return;
+    outputs[name].div.classList.add('off');
+    outputs[name].cb.disabled = true;
+    outputs[name].cb.checked = false;
+    RM.removeMidiOut(name);
+  }
+  else {
+    if (!inputs[name]) return;
+    inputs[name].div.classList.add('off');
+    inputs[name].cb.disabled = true;
+    inputs[name].cb.checked = false;
+    RM.removeMidiIn(name);
+  }
+}
+
 </script>
 </body>
 </html>
