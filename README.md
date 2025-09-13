@@ -15,4 +15,7 @@ where `<port>` is the port number, default: `8888`
 Optional: to enable `https`, create files `server.key` and `server.crt` in the project directory.  
 e.g. `openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout ./server.key -out server.crt`
 
+## How it works
 ![MIDI via WebRTC screenshot](https://raw.githubusercontent.com/jazz-soft/RTC-MIDI-Test/refs/heads/main/content/screen.png)
+
+Start a WebRTC session. Share your MIDI ports with your party. See and connect to the MIDI ports shared with you.
