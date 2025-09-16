@@ -5,7 +5,8 @@ You can use it as a starting point for your own applications.
 
 This server establishes a WebRTC session between two clients on a local network.
 
-For simplicity, only two clients are supported simultaneously, and no STUN/TURN servers are involved.
+For simplicity, only two clients are supported simultaneously, and no STUN/TURN servers are involved.  
+( you can add your own STUN/TURN server [here](https://github.com/jazz-soft/RTC-MIDI-Test/blob/main/content/webrtc.js#L12) )
 
 ## Usage
 `npm install`  
